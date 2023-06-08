@@ -49,6 +49,20 @@ func Run(ipport string) bool {
 	return true
 }
 
+func Run2(ipport string) bool {
+	ser := &http.Server{
+		Addr:    ipport,
+		Handler: GlobalServeEngine,
+	}
+
+	err := ser.ListenAndServe()
+	if err != nil {
+		log.Debugf("Run serve fail:%s\n", err)
+		return false
+	}
+	return true
+}
+
 func Login(ctx *gin.Context) {
 	loginUser := &types.ReqUser{}
 	dbUser := &db.User{}
@@ -137,7 +151,7 @@ func Register(ctx *gin.Context) {
 }
 
 func genDbUser(dbu *db.User, requ *types.ReqUser) bool {
-	dbu.Id = USERID.Add(1)
+	// dbu.Id = USERID.Add(1)
 	dbu.Avatar = requ.Name
 	dbu.Create_time = time.Now()
 	dbu.Email = requ.Email

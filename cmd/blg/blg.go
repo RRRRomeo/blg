@@ -20,7 +20,7 @@ func main() {
 		return
 	}
 
-	if !serve.Run(":54591") {
+	if !serve.Run2(":54591") {
 		qlog.Errf("serve run fail\n")
 		return
 	}
