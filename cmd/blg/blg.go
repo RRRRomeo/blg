@@ -3,12 +3,13 @@ package main
 import (
 	"blg/blg/db"
 	"blg/blg/serve"
+	"blg/tools/cnf"
 
 	qlog "github.com/RRRRomeo/QLog/api"
 )
 
 func main() {
-	qlog.Debugf("test\n")
+	cnf.ReadCnf()
 	db.Init()
 	if !serve.Init() {
 		qlog.Errf("serve init fail!\n")
@@ -20,7 +21,7 @@ func main() {
 		return
 	}
 
-	if !serve.Run2(":54591") {
+	if !serve.Run(":54591") {
 		qlog.Errf("serve run fail\n")
 		return
 	}

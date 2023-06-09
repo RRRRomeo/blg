@@ -14,6 +14,10 @@ func NewRouter(engine *gin.Engine) *Router {
 	}
 }
 
-func (r *Router) SetRouter(url string, handler ...gin.HandlerFunc) {
+func (r *Router) SetRouterPost(url string, handler ...gin.HandlerFunc) {
 	r.Engine.POST(url, handler...)
+}
+
+func (r *Router) SetRouterGet(url string, handler ...gin.HandlerFunc) {
+	r.Engine.GET(url, handler...)
 }

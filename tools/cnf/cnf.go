@@ -3,8 +3,8 @@ package cnf
 import (
 	"blg/tools/common"
 	"fmt"
-	"log"
 	"path"
+	"sync"
 
 	"github.com/spf13/viper"
 )
@@ -27,6 +27,7 @@ type DbCnf struct {
 }
 
 type CNF struct {
+	sync.Mutex
 	Server ServerCnf
 	Log    LogCnf
 	Db     DbCnf
@@ -34,9 +35,9 @@ type CNF struct {
 
 var GlobalCnf CNF
 
-func readCnf() {
+func ReadCnf() {
 	cnfPath := path.Join(common.GetCurPath(), "cnf")
-	fmt.Printf("cnfPath:%s\n", cnfPath)
+	// fmt.Printf("cnfPath:%s\n", cnfPath)
 	// 初始化 Viper
 	viper.SetConfigName("blg")   // 配置文件的文件名（不包含扩展名）
 	viper.SetConfigType("yaml")  // 配置文件的类型，这里使用 YAML 格式
@@ -48,6 +49,7 @@ func readCnf() {
 		panic(fmt.Errorf("failed to read config file: %s", err))
 	}
 
+	GlobalCnf.Lock()
 	// // 读取配置项的值
 	GlobalCnf.Server.Addr = viper.GetString("blg.server.addr")
 	GlobalCnf.Server.Port = viper.GetString("blg.server.port")
@@ -59,7 +61,8 @@ func readCnf() {
 	GlobalCnf.Log.Level = viper.GetString("blg.log.level")
 
 	// // 打印配置项的值
-	log.Printf("GlobalCnf:%+v\n", GlobalCnf)
+	// log.Printf("GlobalCnf:%+v\n", GlobalCnf)
+	GlobalCnf.Unlock()
 }
 
 // func VipperReadSeverCnf() {

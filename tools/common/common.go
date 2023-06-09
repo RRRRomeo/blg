@@ -1,7 +1,6 @@
 package common
 
 import (
-	"log"
 	"path/filepath"
 	"runtime"
 )
@@ -18,6 +17,5 @@ func GetCurPath() string {
 
 	parentPath := filepath.Join(relativePath, "..", "..")
 
-	log.Printf("parrentPath:%s\n", parentPath)
 	return parentPath
 }
