@@ -37,10 +37,56 @@ func GetBlgServe() *BlgServe {
 }
 
 func EventsHandler() bool {
+	Serve.GlobalRouter.Engine.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, oauth-token, Authorization")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+		c.Next()
+	})
+	//=====================articles===========================/
+	Serve.GlobalRouter.SetRouterGet("/articles", mid.UserAuth(), ctrl.GetArticles)
+	Serve.GlobalRouter.SetRouterGet("/articles/hot", mid.UserAuth(), ctrl.GetArticlesHot)
+	Serve.GlobalRouter.SetRouterGet("/articles/new", mid.UserAuth(), ctrl.GetArticlesNew)
+	Serve.GlobalRouter.SetRouterGet("/articles/:id", mid.UserAuth(), ctrl.GetArticleById)
+	Serve.GlobalRouter.SetRouterGet("/articles/view/:id", mid.UserAuth(), ctrl.GetSelectArticleView)
+	Serve.GlobalRouter.SetRouterGet("/articles/category/:id", mid.UserAuth(), ctrl.GetSelectArticleCategory)
+	Serve.GlobalRouter.SetRouterGet("/articles/tag/:id", mid.UserAuth(), ctrl.GetSelectArticleTag)
+	Serve.GlobalRouter.SetRouterPost("/articles/publish", mid.UserAuth(), ctrl.PublishArticle)
+	Serve.GlobalRouter.SetRouterPost("/articles/update", mid.UserAuth(), ctrl.UpdateArticle)
+	Serve.GlobalRouter.SetRouterGet("/articles/delete/:id", mid.UserAuth(), ctrl.DeleteArticleByID)
+	Serve.GlobalRouter.SetRouterGet("/articles/listArchives", mid.UserAuth(), ctrl.GetListArchives)
+
+	// //=====================category===========================/
+	// Serve.GlobalRouter.SetRouterGet("/categorys", mid.UserAuth(), ctrl.GetCategorys)
+	// Serve.GlobalRouter.SetRouterGet("/categorys/detail", mid.UserAuth(), ctrl.GetCategorysDetail)
+	// Serve.GlobalRouter.SetRouterGet("/categorys/:id", mid.UserAuth(), ctrl.GetSelectCategory)
+	// Serve.GlobalRouter.SetRouterGet("/categorys/detail/:id", mid.UserAuth(), ctrl.GetSelectCategorysDetail)
+
+	// //=====================comment===========================/
+	// Serve.GlobalRouter.SetRouterGet("/comments/article/:id", mid.UserAuth(), ctrl.GetCommentsByArticle)
+	// Serve.GlobalRouter.SetRouterPost("/comments/article/change", mid.UserAuth(), ctrl.PublishComment)
+
+	//=====================login=============================/
 	Serve.GlobalRouter.SetRouterPost("/api/register", mid.CheckUserExistMiddleware, ctrl.Register)
 	Serve.GlobalRouter.SetRouterPost("/api/login", ctrl.Login)
 	Serve.GlobalRouter.SetRouterPost("/api/create_post", mid.UserAuth(), ctrl.CreatePost)
 	Serve.GlobalRouter.SetRouterPost("/api/update_post", mid.UserAuth(), ctrl.UpdatePost)
+	Serve.GlobalRouter.SetRouterGet("/users/currentUser", mid.UserAuth(), ctrl.GetCurrentUser)
+
+	// //=====================tags===============================/
+	// Serve.GlobalRouter.SetRouterGet("/tags", mid.UserAuth(), ctrl.GetTags)
+	// Serve.GlobalRouter.SetRouterGet("/tags/detail", mid.UserAuth(), ctrl.GetTagsDetail)
+	// Serve.GlobalRouter.SetRouterGet("/tags/hot", mid.UserAuth(), ctrl.GetTagsHot)
+	// Serve.GlobalRouter.SetRouterGet("/tags/:id", mid.UserAuth(), ctrl.GetSelectTags)
+	// Serve.GlobalRouter.SetRouterGet("/tags/detail/:id", mid.UserAuth(), ctrl.GetSelectTagDetail)
+
+	// //=====================upload=============================/
+	// Serve.GlobalRouter.SetRouterPost("/upload", mid.UserAuth(), ctrl.Upload)
+
 	return true
 }
 

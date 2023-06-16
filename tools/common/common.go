@@ -1,8 +1,11 @@
 package common
 
 import (
+	"blg/blg/model"
 	"path/filepath"
 	"runtime"
+
+	"gorm.io/gorm"
 )
 
 func GetCurPath() string {
@@ -18,4 +21,13 @@ func GetCurPath() string {
 	parentPath := filepath.Join(relativePath, "..", "..")
 
 	return parentPath
+}
+
+func FindCategoryId(db *gorm.DB, category string) (int, error) {
+	dbcategory := &model.ArticleCategory{}
+	if err := db.Model(&model.ArticleCategory{}).Where("categoryname = ?", category).First(category).Error; err != nil {
+		return -1, err
+	}
+
+	return dbcategory.Id, nil
 }

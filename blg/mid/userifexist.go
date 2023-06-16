@@ -13,6 +13,7 @@ import (
 
 // CheckUserExistMiddleware 是检查用户是否存在的中间件
 func CheckUserExistMiddleware(c *gin.Context) {
+	// 使用 gin-cors 中间件来处理跨域请求
 	var user types.ReqUser
 
 	// 解析 JSON 请求体到 User 结构体
@@ -25,7 +26,7 @@ func CheckUserExistMiddleware(c *gin.Context) {
 
 	// 查找数据库
 	var dbuser model.User
-	if err := db.Global.Where(" email = ?", user.Email).First(&dbuser).Error; err == nil {
+	if err := db.Global.Where(" account = ?", user.Account).First(&dbuser).Error; err == nil {
 		resp.Fail(c, nil, "user already exist!")
 		c.Abort()
 		return

@@ -23,7 +23,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	ret := db.Global.Where("email = ?", loginUser.Email).First(dbUser)
+	ret := db.Global.Where("account = ?", loginUser.Account).First(dbUser)
 	if ret.Error != nil {
 		resp.Fail(ctx, nil, "user dont exist:"+ret.Error.Error())
 		return
@@ -78,5 +78,6 @@ func Register(ctx *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp.Success(ctx, nil, "user register success!")
+	resp.Success(ctx, nil, "register success!")
+	// ctx.JSON(http.StatusOK, gin.H{'Oauth-Token': "token",})
 }
