@@ -2,6 +2,7 @@ package common
 
 import (
 	"blg/blg/model"
+	"fmt"
 	"path/filepath"
 	"runtime"
 
@@ -25,7 +26,9 @@ func GetCurPath() string {
 
 func FindCategoryId(db *gorm.DB, category string) (int, error) {
 	dbcategory := &model.ArticleCategory{}
+	fmt.Printf("category:%s\n", category)
 	if err := db.Model(&model.ArticleCategory{}).Where("categoryname = ?", category).First(category).Error; err != nil {
+		fmt.Printf("err:%s\n", err)
 		return -1, err
 	}
 

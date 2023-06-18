@@ -1,19 +1,17 @@
 package dto
 
 import (
-	"blg/blg/db"
 	"blg/blg/model"
-	"blg/tools/common"
 	"blg/types"
 	"time"
 )
 
 // 转换请求数据生成数据类型
-func ArticleDto(ar_db *model.Article, req *types.ReqArticle, authorId int64, category string, tags []string, arbody *model.ArticleBody) bool {
+func ArticleDto(ar_db *model.Article, req *types.ReqArticle, authorId int64, categoryId int, tags []string, arbody *model.ArticleBody) bool {
 	var err error
 	ar_db.AuthorId = authorId
 	ar_db.BodyId = int64(arbody.Id)
-	ar_db.CategoryId, err = common.FindCategoryId(db.GetDB(), category)
+	ar_db.CategoryId = categoryId
 	if err != nil {
 		return false
 	}
@@ -22,7 +20,8 @@ func ArticleDto(ar_db *model.Article, req *types.ReqArticle, authorId int64, cat
 	ar_db.CreateDate = time.Now()
 	ar_db.Summary = req.Summary
 	ar_db.Title = req.Title
-	ar_db.ViewCount = 0
+	ar_db.ViewCounts = 0
+	ar_db.Weight = 1
 	return true
 }
 
@@ -38,6 +37,6 @@ func ArticleOtd(rsp *types.RspArticle, dbo *model.Article, dbu *model.User, dbb 
 	rsp.Summary = dbo.Summary
 	rsp.Tags = tags
 	rsp.Title = dbo.Title
-	rsp.ViewCount = dbo.ViewCount
+	rsp.ViewCount = dbo.ViewCounts
 	return true
 }

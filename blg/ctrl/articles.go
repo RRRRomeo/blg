@@ -123,15 +123,18 @@ func (s *ArticleServicer) Publisher(req *types.ReqArticle, user *model.User, dba
 		return false
 	}
 
+	fmt.Printf("content:%s html:%s\n", req.Content, req.ContentHtml)
 	dbArticleBody := &model.ArticleBody{
-		Content:     req.Body.Content,
-		ContentHtml: req.Body.ContentHtml,
+		Content:     req.Content,
+		ContentHtml: req.ContentHtml,
 	}
 
-	if !checkCategoryExist(req.Category) {
+	categoryId := 0
+	if !checkCategoryExist(req.Category, &categoryId) {
 		fmt.Printf("category dont exist!\n")
 		return false
 	}
+	fmt.Printf("after check category\n")
 
 	// insert body into db
 	dbp := db.GetDB()
@@ -141,7 +144,8 @@ func (s *ArticleServicer) Publisher(req *types.ReqArticle, user *model.User, dba
 		return false
 	}
 
-	if !dto.ArticleDto(dbarticle, req, user.Id, req.Category, req.Tags, dbArticleBody) {
+	fmt.Printf("after insert  body, cate:%s\n", req.Category)
+	if !dto.ArticleDto(dbarticle, req, user.Id, categoryId, req.Tags, dbArticleBody) {
 		return false
 	}
 
@@ -172,8 +176,8 @@ func (s *ArticleServicer) Updater(req *types.ReqArticle, user *model.User, artic
 	}
 
 	// update body
-	body.Content = req.Body.Content
-	body.ContentHtml = req.Body.ContentHtml
+	body.Content = req.Content
+	body.ContentHtml = req.ContentHtml
 
 	if err := dbp.Model(&model.ArticleBody{}).Save(body).Error; err != nil {
 		fmt.Printf("update article fail:%s\n", err)
@@ -188,7 +192,7 @@ func (s *ArticleServicer) Updater(req *types.ReqArticle, user *model.User, artic
 	dbarticle.CategoryId = categoryId
 	dbarticle.Summary = req.Summary
 	dbarticle.Title = req.Title
-	dbarticle.ViewCount += 1
+	dbarticle.ViewCounts += 1
 	return true
 }
 
@@ -550,6 +554,7 @@ func PublishArticle(ctx *gin.Context) {
 		resp.Fail(ctx, nil, "get user fail")
 	}
 
+	fmt.Printf("inPublish\n")
 	// TODO: 校验articles参数合法性,后面转到mid去
 
 	s := NewArticleServicer(nil)
@@ -697,15 +702,27 @@ func DeleteArticleByID(ctx *gin.Context) {
 
 /**=======================TOOLS_FUNC=======================*/
 
-func checkCategoryExist(category string) bool {
+func checkCategoryExist(category string, id *int) bool {
 	if category == "" {
 		return false
 	}
 	ca := &model.ArticleCategory{}
 	dbp := db.GetDB()
 	if err := dbp.Model(&model.ArticleCategory{}).Where("categoryname = ?", category).First(ca).Error; err != nil {
-		return false
+		// category dont exist insert in db
+		// TODO: change the func from category ctrl
+		ca.CategoryName = category
+		ca.Avatar = category
+		ca.Description = category
+
+		if err := dbp.Model(&model.ArticleCategory{}).Create(ca).Error; err != nil {
+			fmt.Printf("create category fail:%s\n", err)
+			return false
+		}
+
 	}
+	*id = ca.Id
+
 	return true
 }
 

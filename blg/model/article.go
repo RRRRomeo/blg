@@ -32,9 +32,10 @@ type Article struct {
 	CreateDate    time.Time `gorm:"column:create_date;type:datetime" json:"create_date,omitempty"`
 	Summary       string    `gorm:"column:summary;type:varchar;size:255" json:"summary,omitempty"`
 	Title         string    `gorm:"column:title;type:varchar;size:255" json:"title,omitempty"`
-	ViewCount     int       `gorm:"column:view_count;type:int" json:"view_count,omitempty"`
+	ViewCounts    int       `gorm:"column:view_counts;type:int" json:"view_count,omitempty"`
 	AuthorId      int64     `gorm:"column:author_id;type:bigint" json:"author_id,omitempty"`
 	BodyId        int64     `gorm:"column:body_id;type:bigint" json:"body_id,omitempty"`
+	Weight        int       `gorm:"column:weight;type:int" json:"weight,omitempty"`
 	CategoryId    int       `gorm:"column:category_id;type:int" json:"category_id,omitempty"`
 }
 

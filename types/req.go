@@ -51,10 +51,11 @@ type ReqArticleBody struct {
 }
 
 type ReqArticle struct {
-	Id       int            `json:"id,omitempty"`
-	Title    string         `json:"title,omitempty"`
-	Summary  string         `json:"summary,omitempty"`
-	Category string         `json:"category,omitempty"`
-	Tags     []string       `json:"tags,omitempty"`
-	Body     ReqArticleBody `json:"body,omitempty"`
+	Id          int      `json:"id,omitempty"`
+	Title       string   `json:"title,omitempty"`
+	Summary     string   `json:"summary,omitempty"`
+	Category    string   `json:"category,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+	Content     string   `json:"content,omitempty"`
+	ContentHtml string   `json:"content_html,omitempty"`
 }
