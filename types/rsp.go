@@ -7,23 +7,6 @@ type RspArticleCategory struct {
 	TagId      []int `json:"tag_id,omitempty"`
 }
 
-//	article: {
-//	  id: '',
-//	  title: '',
-//	  commentCounts: 0,
-//	  viewCounts: 0,
-//	  summary: '',
-//	  author: {},
-//	  tags: [],
-//	  category:{},
-//	  createDate: '',
-//	  editor: {
-//	    value: '',
-//	    toolbarsFlag: false,
-//	    subfield: false,
-//	    defaultOpen: 'preview'
-//	  }
-//	},
 type RspArticleBody struct {
 	Content     string `json:"content,omitempty"`
 	ContentHtml string `json:"content_html,omitempty"`

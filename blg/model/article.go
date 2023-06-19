@@ -50,7 +50,7 @@ type ArticleCategory struct {
 	Description  string `gorm:"column:description;type:varchar"`
 }
 
-func (c ArticleCategory) TableName() string {
+func (c *ArticleCategory) TableName() string {
 	return "me_category"
 }
 

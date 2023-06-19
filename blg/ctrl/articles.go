@@ -123,7 +123,6 @@ func (s *ArticleServicer) Publisher(req *types.ReqArticle, user *model.User, dba
 		return false
 	}
 
-	fmt.Printf("content:%s html:%s\n", req.Content, req.ContentHtml)
 	dbArticleBody := &model.ArticleBody{
 		Content:     req.Content,
 		ContentHtml: req.ContentHtml,
@@ -134,8 +133,8 @@ func (s *ArticleServicer) Publisher(req *types.ReqArticle, user *model.User, dba
 		fmt.Printf("category dont exist!\n")
 		return false
 	}
-	fmt.Printf("after check category\n")
 
+	fmt.Printf("categoryid :%d\n", categoryId)
 	// insert body into db
 	dbp := db.GetDB()
 	if err := dbp.Model(&model.ArticleBody{}).Create(&dbArticleBody).Error; err != nil {
@@ -144,7 +143,6 @@ func (s *ArticleServicer) Publisher(req *types.ReqArticle, user *model.User, dba
 		return false
 	}
 
-	fmt.Printf("after insert  body, cate:%s\n", req.Category)
 	if !dto.ArticleDto(dbarticle, req, user.Id, categoryId, req.Tags, dbArticleBody) {
 		return false
 	}
@@ -554,7 +552,6 @@ func PublishArticle(ctx *gin.Context) {
 		resp.Fail(ctx, nil, "get user fail")
 	}
 
-	fmt.Printf("inPublish\n")
 	// TODO: 校验articles参数合法性,后面转到mid去
 
 	s := NewArticleServicer(nil)

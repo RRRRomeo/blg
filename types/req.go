@@ -6,13 +6,6 @@ type ReqUser struct {
 	Password string `json:"password,omitempty"`
 }
 
-// Id         int       `gorm:"column:id"`
-// Title      string    `gorm:"column:title"`
-// Content    string    `gorm:"column:content"`
-// Is_public  int8      `gorm:"column:is_public"`
-// Author_id  int64     `gorm:"column:author_id"`
-// Created_at time.Time `gorm:"column:create_at"`
-// Updated_at time.Time `gorm:"column:update_at"`
 type ReqCreatePost struct {
 	Title    string `json:"title"`
 	Content  string `json:"content"`
@@ -24,26 +17,12 @@ type ReqUpdatePost struct {
 	ReqCreatePost
 }
 
-// commit('SET_ACCOUNT', data.data.account)
-// commit('SET_NAME', data.data.nickname)
-// commit('SET_AVATAR', data.data.avatar)
-// commit('SET_ID', data.data.id)
 type RespGetCurrentUser struct {
 	Account string `json:"account,omitempty"`
 	Nciname string `json:"nciname,omitempty"`
 	Avatar  string `json:"avatar,omitempty"`
 	Id      int64  `json:"id,omitempty"`
 }
-
-// title: this.articleForm.title,
-// summary: this.articleForm.summary,
-// category: this.articleForm.category,
-// tags: tags,
-//
-//	body: {
-//	  content: this.articleForm.editor.value,
-//	  contentHtml: this.articleForm.editor.ref.d_render
-//	}
 
 type ReqArticleBody struct {
 	Content     string `json:"content,omitempty"`
@@ -58,4 +37,12 @@ type ReqArticle struct {
 	Tags        []string `json:"tags,omitempty"`
 	Content     string   `json:"content,omitempty"`
 	ContentHtml string   `json:"content_html,omitempty"`
+}
+
+type ReqComment struct {
+	ArticleId int    `json:"article_id,omitempty"`
+	AuthorId  int    `json:"author_id,omitempty"`
+	ParentId  int    `json:"parent_id,omitempty"`
+	ToUid     int64  `json:"to_uid,omitempty"`
+	Content   string `json:"content,omitempty"`
 }

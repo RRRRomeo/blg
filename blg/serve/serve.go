@@ -60,15 +60,18 @@ func EventsHandler() bool {
 	Serve.GlobalRouter.SetRouterGet("/articles/delete/:id", mid.UserAuth(), ctrl.DeleteArticleByID)
 	Serve.GlobalRouter.SetRouterGet("/articles/listArchives", mid.UserAuth(), ctrl.GetListArchives)
 
-	// //=====================category===========================/
-	// Serve.GlobalRouter.SetRouterGet("/categorys", mid.UserAuth(), ctrl.GetCategorys)
-	// Serve.GlobalRouter.SetRouterGet("/categorys/detail", mid.UserAuth(), ctrl.GetCategorysDetail)
-	// Serve.GlobalRouter.SetRouterGet("/categorys/:id", mid.UserAuth(), ctrl.GetSelectCategory)
-	// Serve.GlobalRouter.SetRouterGet("/categorys/detail/:id", mid.UserAuth(), ctrl.GetSelectCategorysDetail)
+	//=====================category===========================/
+	Serve.GlobalRouter.SetRouterGet("/categories", mid.UserAuth(), ctrl.GetCategories)
+	Serve.GlobalRouter.SetRouterGet("/categories/detail", mid.UserAuth(), ctrl.GetCategoriesDetail)
+	Serve.GlobalRouter.SetRouterGet("/category/:id", mid.UserAuth(), ctrl.GetSelectCategory)
+	Serve.GlobalRouter.SetRouterGet("/category/detail/:id", mid.UserAuth(), ctrl.GetSelectCategoryDetail)
+	// Serve.GlobalRouter.SetRouterGet("/category/delete", mid.UserAuth(), ctrl.DeleteCategory)
+	// Serve.GlobalRouter.SetRouterPost("/category/upload", mid.UserAuth(), ctrl.UploadCategory)
+	// Serve.GlobalRouter.SetRouterPost("/category/update", mid.UserAuth(), ctrl.UpdateCategory)
 
 	// //=====================comment===========================/
-	// Serve.GlobalRouter.SetRouterGet("/comments/article/:id", mid.UserAuth(), ctrl.GetCommentsByArticle)
-	// Serve.GlobalRouter.SetRouterPost("/comments/article/change", mid.UserAuth(), ctrl.PublishComment)
+	Serve.GlobalRouter.SetRouterGet("/comments/article/:id", mid.UserAuth(), ctrl.GetCommentsByArticle)
+	Serve.GlobalRouter.SetRouterPost("/comments/create/change", mid.UserAuth(), ctrl.PublishComment)
 
 	//=====================login=============================/
 	Serve.GlobalRouter.SetRouterPost("/api/register", mid.CheckUserExistMiddleware, ctrl.Register)
@@ -78,8 +81,8 @@ func EventsHandler() bool {
 	Serve.GlobalRouter.SetRouterGet("/users/currentUser", mid.UserAuth(), ctrl.GetCurrentUser)
 
 	// //=====================tags===============================/
-	// Serve.GlobalRouter.SetRouterGet("/tags", mid.UserAuth(), ctrl.GetTags)
-	// Serve.GlobalRouter.SetRouterGet("/tags/detail", mid.UserAuth(), ctrl.GetTagsDetail)
+	Serve.GlobalRouter.SetRouterGet("/tags", mid.UserAuth(), ctrl.GetTags)
+	Serve.GlobalRouter.SetRouterGet("/tags/detail", mid.UserAuth(), ctrl.GetTagsDetail)
 	// Serve.GlobalRouter.SetRouterGet("/tags/hot", mid.UserAuth(), ctrl.GetTagsHot)
 	// Serve.GlobalRouter.SetRouterGet("/tags/:id", mid.UserAuth(), ctrl.GetSelectTags)
 	// Serve.GlobalRouter.SetRouterGet("/tags/detail/:id", mid.UserAuth(), ctrl.GetSelectTagDetail)
