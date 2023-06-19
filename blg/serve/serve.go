@@ -83,9 +83,9 @@ func EventsHandler() bool {
 	// //=====================tags===============================/
 	Serve.GlobalRouter.SetRouterGet("/tags", mid.UserAuth(), ctrl.GetTags)
 	Serve.GlobalRouter.SetRouterGet("/tags/detail", mid.UserAuth(), ctrl.GetTagsDetail)
-	// Serve.GlobalRouter.SetRouterGet("/tags/hot", mid.UserAuth(), ctrl.GetTagsHot)
-	// Serve.GlobalRouter.SetRouterGet("/tags/:id", mid.UserAuth(), ctrl.GetSelectTags)
-	// Serve.GlobalRouter.SetRouterGet("/tags/detail/:id", mid.UserAuth(), ctrl.GetSelectTagDetail)
+	Serve.GlobalRouter.SetRouterGet("/tags/hot", mid.UserAuth(), ctrl.GetTagsHot)
+	Serve.GlobalRouter.SetRouterGet("/tags/:id", mid.UserAuth(), ctrl.GetSelectTags)
+	Serve.GlobalRouter.SetRouterGet("/tags/detail/:id", mid.UserAuth(), ctrl.GetSelectTagDetail)
 
 	// //=====================upload=============================/
 	// Serve.GlobalRouter.SetRouterPost("/upload", mid.UserAuth(), ctrl.Upload)
