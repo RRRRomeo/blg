@@ -70,6 +70,7 @@ func Register(ctx *gin.Context) {
 		resp.Response(ctx, http.StatusInternalServerError, 500, nil, "dto fail!")
 		return
 	}
+
 	ret := db.Global.Create(&dbuser)
 	if ret.Error != nil {
 		log.Errf("create user fail:%s\n", ret.Error)
@@ -77,7 +78,13 @@ func Register(ctx *gin.Context) {
 		return
 	}
 
+	rspuser := types.RespGetCurrentUser{
+		Id:       dbuser.Id,
+		Account:  user.Account,
+		Nickname: user.NickName,
+		Avatar:   "https://s1.ax1x.com/2023/06/25/pCNLtdP.png",
+	}
 	// 返回成功响应
-	resp.Success(ctx, nil, "register success!")
+	resp.Success(ctx, gin.H{"data": rspuser}, "register success!")
 	// ctx.JSON(http.StatusOK, gin.H{'Oauth-Token': "token",})
 }

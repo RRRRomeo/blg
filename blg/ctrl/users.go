@@ -22,10 +22,10 @@ func GetCurrentUser(c *gin.Context) {
 	}
 
 	respCurrUser := types.RespGetCurrentUser{
-		Account: user.Account,
-		Nciname: user.Nickname,
-		Avatar:  user.Avatar,
-		Id:      user.Id,
+		Account:  user.Account,
+		Nickname: user.Nickname,
+		Avatar:   user.Avatar,
+		Id:       user.Id,
 	}
 
 	resp.Success(c, gin.H{"currentUser": respCurrUser}, "get msg success!")

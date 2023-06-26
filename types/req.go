@@ -2,7 +2,7 @@ package types
 
 type ReqUser struct {
 	Account  string `json:"account,omitempty"`
-	Nickname string `json:"nickname,omitempty"`
+	NickName string `json:"nickname,omitempty"`
 	Password string `json:"password,omitempty"`
 }
 
@@ -18,25 +18,36 @@ type ReqUpdatePost struct {
 }
 
 type RespGetCurrentUser struct {
-	Account string `json:"account,omitempty"`
-	Nciname string `json:"nciname,omitempty"`
-	Avatar  string `json:"avatar,omitempty"`
-	Id      int64  `json:"id,omitempty"`
+	Account  string `json:"account,omitempty"`
+	Nickname string `json:"nickname,omitempty"`
+	Avatar   string `json:"avatar,omitempty"`
+	Id       int64  `json:"id,omitempty"`
 }
 
 type ReqArticleBody struct {
 	Content     string `json:"content,omitempty"`
 	ContentHtml string `json:"content_html,omitempty"`
 }
+type ReqCategory struct {
+	Id           int    `json:"id,omitempty"`
+	CategoryName string `json:"categoryname,omitempty"`
+	Avatar       string `json:"avatar,omitempty"`
+	Description  string `json:"description,omitempty"`
+}
+
+type ReqTag struct {
+	Id      int    `json:"id,omitempty"`
+	TagName string `json:"tagname,omitempty"`
+	Avatar  string `json:"avatar,omitempty"`
+}
 
 type ReqArticle struct {
-	Id          int      `json:"id,omitempty"`
-	Title       string   `json:"title,omitempty"`
-	Summary     string   `json:"summary,omitempty"`
-	Category    string   `json:"category,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
-	Content     string   `json:"content,omitempty"`
-	ContentHtml string   `json:"content_html,omitempty"`
+	Id       string         `json:"id,omitempty"`
+	Title    string         `json:"title,omitempty"`
+	Summary  string         `json:"summary,omitempty"`
+	Category []ReqCategory  `json:"category,omitempty"`
+	Tags     []ReqTag       `json:"tags,omitempty"`
+	Body     ReqArticleBody `json:"body,omitempty"`
 }
 
 type ReqComment struct {

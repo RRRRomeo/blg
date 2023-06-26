@@ -119,17 +119,17 @@ func (s *ArticleServicer) GetSelectArticleCategory(id int) (*model.Article, *[]m
 }
 
 func (s *ArticleServicer) Publisher(req *types.ReqArticle, user *model.User, dbarticle *model.Article) bool {
-	if req.Title == "" || req.Category == "" {
+	if req.Title == "" || req.Category == nil {
 		return false
 	}
 
 	dbArticleBody := &model.ArticleBody{
-		Content:     req.Content,
-		ContentHtml: req.ContentHtml,
+		Content:     req.Body.Content,
+		ContentHtml: req.Body.ContentHtml,
 	}
 
 	categoryId := 0
-	if !checkCategoryExist(req.Category, &categoryId) {
+	if !checkCategoryExist(&req.Category[0], &categoryId) {
 		fmt.Printf("category dont exist!\n")
 		return false
 	}
@@ -156,8 +156,8 @@ func (s *ArticleServicer) Publisher(req *types.ReqArticle, user *model.User, dba
 	return true
 }
 
-func (s *ArticleServicer) Updater(req *types.ReqArticle, user *model.User, articleId int, dbarticle *model.Article) bool {
-	if req.Title == "" || req.Category == "" {
+func (s *ArticleServicer) Updater(req *types.ReqArticle, user *model.User, articleId string, dbarticle *model.Article) bool {
+	if req.Title == "" || req.Category == nil {
 		return false
 	}
 
@@ -174,15 +174,15 @@ func (s *ArticleServicer) Updater(req *types.ReqArticle, user *model.User, artic
 	}
 
 	// update body
-	body.Content = req.Content
-	body.ContentHtml = req.ContentHtml
+	body.Content = req.Body.Content
+	body.ContentHtml = req.Body.ContentHtml
 
 	if err := dbp.Model(&model.ArticleBody{}).Save(body).Error; err != nil {
 		fmt.Printf("update article fail:%s\n", err)
 		return false
 	}
 
-	categoryId := getCategoryIdWithName(req.Category)
+	categoryId := getCategoryIdWithName(req.Category[0].CategoryName)
 	updateArticleTags(dbarticle, req.Tags)
 
 	// update article
@@ -543,6 +543,7 @@ func PublishArticle(ctx *gin.Context) {
 	req := &types.ReqArticle{}
 	err := ctx.ShouldBindJSON(req)
 	if err != nil {
+		fmt.Printf("err:%s\n", err)
 		resp.Fail(ctx, nil, err.Error())
 		return
 	}
@@ -556,7 +557,7 @@ func PublishArticle(ctx *gin.Context) {
 
 	s := NewArticleServicer(nil)
 	dbArticle := &model.Article{}
-	if req.Id == 0 {
+	if req.Id == "" {
 		if !s.Publisher(req, user.(*model.User), dbArticle) {
 			resp.Fail(ctx, nil, "publish article fail!")
 			return
@@ -568,7 +569,7 @@ func PublishArticle(ctx *gin.Context) {
 		}
 	}
 
-	resp.Success(ctx, nil, "publish or update success!")
+	resp.Success(ctx, gin.H{"articleId": dbArticle.Id}, "publish or update success!")
 }
 
 // 打包文章
@@ -699,8 +700,8 @@ func DeleteArticleByID(ctx *gin.Context) {
 
 /**=======================TOOLS_FUNC=======================*/
 
-func checkCategoryExist(category string, id *int) bool {
-	if category == "" {
+func checkCategoryExist(category *types.ReqCategory, id *int) bool {
+	if category == nil {
 		return false
 	}
 	ca := &model.ArticleCategory{}
@@ -708,9 +709,9 @@ func checkCategoryExist(category string, id *int) bool {
 	if err := dbp.Model(&model.ArticleCategory{}).Where("categoryname = ?", category).First(ca).Error; err != nil {
 		// category dont exist insert in db
 		// TODO: change the func from category ctrl
-		ca.CategoryName = category
-		ca.Avatar = category
-		ca.Description = category
+		ca.CategoryName = category.CategoryName
+		ca.Avatar = category.Avatar
+		ca.Description = category.Description
 
 		if err := dbp.Model(&model.ArticleCategory{}).Create(ca).Error; err != nil {
 			fmt.Printf("create category fail:%s\n", err)
@@ -738,7 +739,7 @@ func getCategoryIdWithName(category string) int {
 	return ca.Id
 }
 
-func updateArticleTags(dbarticle *model.Article, tags []string) bool {
+func updateArticleTags(dbarticle *model.Article, tags []types.ReqTag) bool {
 	if dbarticle == nil || tags == nil {
 		return false
 	}
@@ -755,7 +756,7 @@ func updateArticleTags(dbarticle *model.Article, tags []string) bool {
 		for _, r := range *rela {
 			tag := &model.ArticleTag{}
 			dbp.Model(&model.ArticleTag{}).Where("id = ?", r.TagId).First(tag)
-			if v == tag.TagName {
+			if v.TagName == tag.TagName {
 				continue
 			}
 

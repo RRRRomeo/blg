@@ -5,9 +5,10 @@ blg:
   log:
     level: 0
   db:
-    host: 192.168.10.226
+    # host: 192.168.1.11
+    host: tencent.hfouyang.top
     port: 3306
     user: root
     pass: root
-    name: blog
+    name: blg
   

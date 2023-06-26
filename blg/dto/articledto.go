@@ -7,7 +7,7 @@ import (
 )
 
 // 转换请求数据生成数据类型
-func ArticleDto(ar_db *model.Article, req *types.ReqArticle, authorId int64, categoryId int, tags []string, arbody *model.ArticleBody) bool {
+func ArticleDto(ar_db *model.Article, req *types.ReqArticle, authorId int64, categoryId int, tags []types.ReqTag, arbody *model.ArticleBody) bool {
 	var err error
 	ar_db.AuthorId = authorId
 	ar_db.BodyId = int64(arbody.Id)
