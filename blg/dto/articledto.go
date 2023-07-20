@@ -27,7 +27,7 @@ func ArticleDto(ar_db *model.Article, req *types.ReqArticle, authorId int64, cat
 
 // 转换数据类型生成将要发给客户端的响应
 func ArticleOtd(rsp *types.RspArticle, dbo *model.Article, dbu *model.User, dbb *model.ArticleBody, category string, tags []string) bool {
-	rsp.Author = dbu.Account
+	rsp.Author = types.RspAuthor{Name: dbu.Account}
 	rsp.Body.Content = dbb.Content
 	rsp.Body.ContentHtml = dbb.ContentHtml
 	rsp.Category = category
@@ -38,5 +38,12 @@ func ArticleOtd(rsp *types.RspArticle, dbo *model.Article, dbu *model.User, dbb 
 	rsp.Tags = tags
 	rsp.Title = dbo.Title
 	rsp.ViewCount = dbo.ViewCounts
+	return true
+}
+
+// 转换数据类型生成将要发给客户端的响应
+func ArticleCardOtd(rsp *types.RspArticleCard, dbo *model.Article) bool {
+	rsp.Id = dbo.Id
+	rsp.Title = dbo.Title
 	return true
 }

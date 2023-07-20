@@ -4,6 +4,7 @@ import (
 	"blg/blg/db"
 	"blg/blg/model"
 	"blg/blg/resp"
+	"blg/types"
 	"fmt"
 	"strconv"
 
@@ -46,14 +47,15 @@ func GetTagsDetail(ctx *gin.Context) {
 }
 
 func GetTagsHot(ctx *gin.Context) {
-	tags := &model.ArticleTag{}
-	if err := db.GetDB().Model(tags).Where("tagname = ?", "Hot").First(tags).Error; err != nil {
-		fmt.Printf("get hot tag fail\n")
-		resp.Fail(ctx, nil, "get hot tag fail!")
-		return
-	}
+	// TODO: 这里现在是写死的
+	rsptags := make([]types.RspTags, 5)
+	rsptags[0] = types.RspTags{Id: 1019, TagName: "Hot"}
+	rsptags[1] = types.RspTags{Id: 1020, TagName: "New"}
+	rsptags[2] = types.RspTags{Id: 1021, TagName: "Best"}
+	rsptags[3] = types.RspTags{Id: 1022, TagName: "Forbot"}
+	rsptags[4] = types.RspTags{Id: 1023, TagName: "Good"}
 
-	resp.Success(ctx, gin.H{"tag": tags}, "get tag success!")
+	resp.Success(ctx, gin.H{"tags": rsptags}, "get tag success!")
 }
 
 // Serve.GlobalRouter.SetRouterGet("/tags/:id", mid.UserAuth(), ctrl.GetSelectTags)

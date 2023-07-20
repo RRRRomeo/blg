@@ -1,12 +1,12 @@
 blg:
   server:
-    addr: 127.0.0.1
+    addr: 192.168.10.111
     port: 54591
   log:
     level: 0
   db:
-    # host: 192.168.1.11
-    host: tencent.hfouyang.top
+    host: 192.168.10.111
+    # host: tencent.hfouyang.top
     port: 3306
     user: root
     pass: root

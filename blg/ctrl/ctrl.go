@@ -7,6 +7,7 @@ import (
 	"blg/blg/resp"
 	"blg/tools/common"
 	"blg/types"
+	"fmt"
 	"net/http"
 
 	log "github.com/RRRRomeo/QLog/api"
@@ -85,6 +86,7 @@ func Register(ctx *gin.Context) {
 		Avatar:   "https://s1.ax1x.com/2023/06/25/pCNLtdP.png",
 	}
 	// 返回成功响应
+	fmt.Printf("resp success!\n")
 	resp.Success(ctx, gin.H{"data": rspuser}, "register success!")
 	// ctx.JSON(http.StatusOK, gin.H{'Oauth-Token': "token",})
 }

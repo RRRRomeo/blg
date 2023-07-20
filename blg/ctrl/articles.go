@@ -225,6 +225,73 @@ func (s *ArticleServicer) DeleteArticle(id int) (bool, error) {
 }
 
 // 分页查询core
+func (s *ArticleServicer) GetArticlesWith(tag string, category string, limit int) []model.Article {
+	// 查询
+	relations := []model.ArticleTagRelation{}
+	relationIds := make([]int, 0)
+
+	dbp := db.GetDB()
+
+	// 添加标签筛选条件
+	if tag != "" {
+		tag := &model.ArticleTag{}
+		dbpp := db.GetDB()
+		dbpp.Model(&model.ArticleTag{}).Where("tagname = ?", tag).First(tag)
+		if tag.Id != 0 {
+			// dbp = dbp.Where("tag_id = ?", tag.Id)
+			// get articlesId in relation table
+			tmp := db.GetDB()
+
+			tmp.Model(&model.ArticleTagRelation{}).Where("tag_id = ?", tag.Id).Find(&relations)
+			if tmp.Error != nil {
+				fmt.Printf("tag err:%s\n", tmp.Error)
+				return nil
+			}
+		}
+	}
+
+	if category != "" {
+		category := &model.ArticleCategory{}
+		dbpp := db.GetDB()
+		dbpp.Model(&model.ArticleCategory{}).Where("categoryname = ?", category).First(category)
+
+		if category.Id != 0 {
+			dbp = dbp.Where("category_id = ?", category.Id)
+			if dbp.Error != nil {
+				fmt.Printf("category err:%s\n", dbp.Error)
+				return nil
+			}
+		}
+	}
+
+	// 执行分页查询
+	var articles []model.Article
+	if len(relations) == 0 {
+		if err := dbp.Limit(limit).Find(&articles).Error; err != nil {
+			fmt.Printf("get offset fail:%s\n", err)
+			return nil
+		}
+	} else {
+		for _, v := range relations {
+			relationIds = append(relationIds, v.ArticleId)
+		}
+
+		if err := dbp.Where("id IN (?)", relationIds).Limit(limit).Find(&articles).Error; err != nil {
+			fmt.Printf("get offset fail:%s\n", err)
+			return nil
+		}
+	}
+	// // 计算总记录数
+	// var total int64
+	// if err := dbp.Model(&model.Article{}).Count(&total).Error; err != nil {
+	// 	// ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	fmt.Printf("get count fail:%s\n", err)
+	// 	return nil, 0
+	// }
+	return articles
+}
+
+// 分页查询core
 func (s *ArticleServicer) ListArticles() ([]model.Article, int64) {
 	// 分页查询
 	query := s.query
@@ -236,51 +303,51 @@ func (s *ArticleServicer) ListArticles() ([]model.Article, int64) {
 	dbp := db.GetDB()
 
 	// 添加标签筛选条件
-	if query.Tag != "" {
-		tag := &model.ArticleTag{}
-		dbpp := db.GetDB()
-		dbpp.Model(&model.ArticleTag{}).Where("tagname = ?", query.Tag).First(tag)
-		if tag.Id != 0 {
-			// dbp = dbp.Where("tag_id = ?", tag.Id)
-			// get articlesId in relation table
-			tmp := db.GetDB()
+	// if query.Tag != "" {
+	// 	tag := &model.ArticleTag{}
+	// 	dbpp := db.GetDB()
+	// 	dbpp.Model(&model.ArticleTag{}).Where("tagname = ?", query.Tag).First(tag)
+	// 	if tag.Id != 0 {
+	// 		// dbp = dbp.Where("tag_id = ?", tag.Id)
+	// 		// get articlesId in relation table
+	// 		tmp := db.GetDB()
 
-			tmp.Model(&model.ArticleTagRelation{}).Where("tag_id = ?", tag.Id).Find(&relations)
-			if tmp.Error != nil {
-				fmt.Printf("tag err:%s\n", tmp.Error)
-				return nil, 0
-			}
-		}
-	}
+	// 		tmp.Model(&model.ArticleTagRelation{}).Where("tag_id = ?", tag.Id).Find(&relations)
+	// 		if tmp.Error != nil {
+	// 			fmt.Printf("tag err:%s\n", tmp.Error)
+	// 			return nil, 0
+	// 		}
+	// 	}
+	// }
 
 	// 添加分类筛选条件
-	if query.Category != "" {
-		category := &model.ArticleCategory{}
-		dbpp := db.GetDB()
-		dbpp.Model(&model.ArticleCategory{}).Where("categoryname = ?", query.Category).First(category)
+	// if query.Category != "" {
+	// 	category := &model.ArticleCategory{}
+	// 	dbpp := db.GetDB()
+	// 	dbpp.Model(&model.ArticleCategory{}).Where("categoryname = ?", query.Category).First(category)
 
-		if category.Id != 0 {
-			dbp = dbp.Where("category_id = ?", category.Id)
-			if dbp.Error != nil {
-				fmt.Printf("category err:%s\n", dbp.Error)
-				return nil, 0
-			}
-		}
-	}
+	// 	if category.Id != 0 {
+	// 		dbp = dbp.Where("category_id = ?", category.Id)
+	// 		if dbp.Error != nil {
+	// 			fmt.Printf("category err:%s\n", dbp.Error)
+	// 			return nil, 0
+	// 		}
+	// 	}
+	// }
 
 	// 添加时间筛选条件
-	if query.Year != "" && query.Month != "" {
-		dbp = dbp.Where("YEAR(create_date) = ? AND MONTH(create_date) = ?", query.Year, query.Month)
-		if dbp.Error != nil {
-			fmt.Printf("year month err:%s\n", dbp.Error)
-			return nil, 0
-		}
-	}
+	// if query.Year != "" && query.Month != "" {
+	// 	dbp = dbp.Where("YEAR(create_date) = ? AND MONTH(create_date) = ?", query.Year, query.Month)
+	// 	if dbp.Error != nil {
+	// 		fmt.Printf("year month err:%s\n", dbp.Error)
+	// 		return nil, 0
+	// 	}
+	// }
 
-	// 添加名称筛选条件
-	if query.Name != "" {
-		dbp = dbp.Where("name LIKE ?", "%"+query.Name+"%")
-	}
+	// // 添加名称筛选条件
+	// if query.Name != "" {
+	// 	dbp = dbp.Where("name LIKE ?", "%"+query.Name+"%")
+	// }
 
 	// 执行分页查询
 	var articles []model.Article
@@ -312,21 +379,17 @@ func (s *ArticleServicer) ListArticles() ([]model.Article, int64) {
 /**TODO: 以下方法应该是articles_service.go中的service方法, 后面移动到articles_service.go中去*/
 // 查询
 type ArticleQuery struct {
-	Category   string `json:"category,omitempty"`
-	Tag        string `json:"tag,omitempty"`
-	Year       string `json:"year,omitempty"`
-	Month      string `json:"month,omitempty"`
-	PageNumber int    `json:"page_number,omitempty"`
-	PageSize   int    `json:"page_size,omitempty"`
-	Name       string `json:"name,omitempty"` // TODO:?
-	Sort       string `json:"sort,omitempty"`
+	PageNumber int    `form:"pageNumber"` // 这些注解是为了配合Gin的ShouldBindQuery工作
+	PageSize   int    `form:"pageSize"`
+	Name       string `form:"name"`
+	Sort       string `form:"sort"`
 }
 
 // 根据查询条件获取文章
 func GetArticles(ctx *gin.Context) {
 	articleQuery := &ArticleQuery{} // 定义ArticleVo结构体，根据需要修改字段和类型
 
-	err := ctx.ShouldBindJSON(articleQuery) // 将查询参数绑定到article结构体
+	err := ctx.ShouldBindQuery(articleQuery) // 将查询参数绑定到article结构体
 	if err != nil {
 		// 处理错误
 		resp.Fail(ctx, nil, err.Error())
@@ -373,96 +436,56 @@ func GetArticles(ctx *gin.Context) {
 
 // 获取Hot标签文章
 func GetArticlesHot(ctx *gin.Context) {
-	articleQuery := &ArticleQuery{} // 定义ArticleVo结构体，根据需要修改字段和类型
+	articleQueryTag := "Hot"
+	articleQueryPageSize := 6
 
-	err := ctx.ShouldBindJSON(articleQuery) // 将查询参数绑定到article结构体
-	if err != nil {
-		// 处理错误
-		resp.Fail(ctx, nil, err.Error())
-		return
-	}
-
-	articleServicer := NewArticleServicer(articleQuery)
-	dbarticles, total := articleServicer.ListArticles()
+	articleServicer := NewArticleServicer(nil)
+	dbarticles := articleServicer.GetArticlesWith(articleQueryTag, "", articleQueryPageSize)
 	if dbarticles == nil {
 		resp.Fail(ctx, nil, "get articles fail!")
 		return
 	}
 
-	rsparticles := make([]types.RspArticle, len(dbarticles))
+	rsparticlecards := make([]types.RspArticleCard, len(dbarticles))
 
 	for i, v := range dbarticles {
-		curCategory, _ := articleServicer.GetCategory(v.Id)
-		curTags, _ := articleServicer.GetTags(v.Id)
-		curAuthor, _ := articleServicer.GetAuthor(v.Id)
-		curBody, _ := articleServicer.GetArticleBody(v.Id)
-
-		if !dto.ArticleOtd(&rsparticles[i], &v, curAuthor, curBody, curCategory, curTags) {
+		if !dto.ArticleCardOtd(&rsparticlecards[i], &v) {
 			fmt.Printf("dto articles fail!\n")
 			resp.Fail(ctx, nil, "dto articles fail")
 			return
 		}
-
 	}
 
+	fmt.Printf("rsp:%v\n", rsparticlecards)
 	// 构建分页结果
-	result := gin.H{
-		"articles": rsparticles,
-		"meta": gin.H{
-			"total":      total,
-			"page":       articleQuery.PageNumber,
-			"page_size":  articleQuery.PageSize,
-			"total_page": int(math.Ceil(float64(total) / float64(articleQuery.PageSize))),
-		},
-	}
-	resp.Success(ctx, result, "get articles success!")
+	resp.Success(ctx, gin.H{"data": rsparticlecards}, "get articlesCard Hot success!")
 }
 
 // 获取New标签文章
 func GetArticlesNew(ctx *gin.Context) {
-	articleQuery := &ArticleQuery{} // 定义ArticleVo结构体，根据需要修改字段和类型
+	articleQueryTag := "New"
+	articleQueryPageSize := 6
 
-	err := ctx.ShouldBindJSON(articleQuery) // 将查询参数绑定到article结构体
-	if err != nil {
-		// 处理错误
-		resp.Fail(ctx, nil, err.Error())
-		return
-	}
-
-	articleServicer := NewArticleServicer(articleQuery)
-	dbarticles, total := articleServicer.ListArticles()
+	articleServicer := NewArticleServicer(nil)
+	dbarticles := articleServicer.GetArticlesWith(articleQueryTag, "", articleQueryPageSize)
 	if dbarticles == nil {
 		resp.Fail(ctx, nil, "get articles fail!")
 		return
 	}
 
-	rsparticles := make([]types.RspArticle, len(dbarticles))
+	rsparticlecards := make([]types.RspArticleCard, len(dbarticles))
 
 	for i, v := range dbarticles {
-		curCategory, _ := articleServicer.GetCategory(v.Id)
-		curTags, _ := articleServicer.GetTags(v.Id)
-		curAuthor, _ := articleServicer.GetAuthor(v.Id)
-		curBody, _ := articleServicer.GetArticleBody(v.Id)
-
-		if !dto.ArticleOtd(&rsparticles[i], &v, curAuthor, curBody, curCategory, curTags) {
+		if !dto.ArticleCardOtd(&rsparticlecards[i], &v) {
 			fmt.Printf("dto articles fail!\n")
 			resp.Fail(ctx, nil, "dto articles fail")
 			return
 		}
-
 	}
 
+	fmt.Printf("rsp:%v\n", rsparticlecards)
 	// 构建分页结果
-	result := gin.H{
-		"articles": rsparticles,
-		"meta": gin.H{
-			"total":      total,
-			"page":       articleQuery.PageNumber,
-			"page_size":  articleQuery.PageSize,
-			"total_page": int(math.Ceil(float64(total) / float64(articleQuery.PageSize))),
-		},
-	}
-	resp.Success(ctx, result, "get articles success!")
+	resp.Success(ctx, gin.H{"data": rsparticlecards}, "get articlesCard New success!")
 }
 
 // 通过文章id获取文章内容
@@ -572,9 +595,35 @@ func PublishArticle(ctx *gin.Context) {
 	resp.Success(ctx, gin.H{"articleId": dbArticle.Id}, "publish or update success!")
 }
 
+type ArticleVo struct {
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Count int `json:"count"`
+}
+
 // 打包文章
 func GetListArchives(ctx *gin.Context) {
 	// "select year(create_date) as year,month(create_date) as month,count(*) as count from me_article group by year(create_date),month(create_date)"
+	var result []ArticleVo
+
+	dbp := db.GetDB()
+	rows, err := dbp.Raw(`SELECT YEAR(create_date) as year, MONTH(create_date) as month, COUNT(*) as count FROM me_article GROUP BY YEAR(create_date), MONTH(create_date)`).Rows()
+	if err != nil {
+		resp.Fail(ctx, nil, err.Error())
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var vo ArticleVo
+		if err = rows.Scan(&vo.Year, &vo.Month, &vo.Count); err != nil {
+			resp.Fail(ctx, nil, err.Error())
+			return
+		}
+		result = append(result, vo)
+	}
+
+	resp.Success(ctx, gin.H{"archives": result}, "get archives success!")
 }
 
 // 通过文章id获取文章
