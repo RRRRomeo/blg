@@ -7,7 +7,6 @@ import (
 	"blg/blg/resp"
 	"blg/types"
 	"fmt"
-	"math"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +42,7 @@ func (s *ArticleServicer) GetAuthor(id int) (*model.User, error) {
 }
 
 // 获取tags([]string)
-func (s *ArticleServicer) GetTags(id int) ([]string, error) {
+func (s *ArticleServicer) GetTags(id int) ([]model.ArticleTag, error) {
 	art, err := s.GetArticle(id)
 	if err != nil {
 		return nil, err
@@ -55,34 +54,34 @@ func (s *ArticleServicer) GetTags(id int) ([]string, error) {
 	if err := dbp.Model(&model.ArticleTagRelation{}).Where("article_id = ?", art.Id).Find(&tags).Error; err != nil {
 		return nil, err
 	}
-	rettags := make([]string, 0)
+	rettags := make([]model.ArticleTag, 0)
 	for _, tag := range tags {
 		// tagId ==> tagname
 		tmp := db.GetDB()
 		out := &model.ArticleTag{}
 		tmp.Model(&model.ArticleTag{}).Where("id = ?", tag.TagId).First(out)
-		rettags = append(rettags, out.TagName)
+		rettags = append(rettags, *out)
 	}
 
 	return rettags, nil
 }
 
 // 获取category(string)
-func (s *ArticleServicer) GetCategory(id int) (string, error) {
+func (s *ArticleServicer) GetCategory(id int) (*model.ArticleCategory, error) {
 	art := &model.Article{}
 	category := &model.ArticleCategory{}
 	dbp := db.GetDB()
 	if err := dbp.Model(&model.Article{}).Where("id = ?", id).First(art).Error; err != nil {
 		fmt.Printf("find category_id fail:%s\n", err)
-		return "", err
+		return nil, err
 	}
 
 	dbpp := db.GetDB()
 	if err := dbpp.Model(&model.ArticleCategory{}).Where("id = ?", art.CategoryId).First(category).Error; err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return category.CategoryName, nil
+	return category, nil
 }
 
 // 获取model.ArcileBody
@@ -398,7 +397,7 @@ func GetArticles(ctx *gin.Context) {
 
 	articleServicer := NewArticleServicer(articleQuery)
 
-	dbarticles, total := articleServicer.ListArticles()
+	dbarticles, _ := articleServicer.ListArticles()
 
 	if dbarticles == nil {
 		resp.Fail(ctx, nil, "get articles fail!")
@@ -406,15 +405,15 @@ func GetArticles(ctx *gin.Context) {
 	}
 
 	// TODO: dto
-	rsparticles := make([]types.RspArticle, len(dbarticles))
+	rsparticles := make([]types.RspArticleItem, len(dbarticles))
 
 	for i, v := range dbarticles {
-		curCategory, _ := articleServicer.GetCategory(v.Id)
+		// curCategory, _ := articleServicer.GetCategory(v.Id)
 		curTags, _ := articleServicer.GetTags(v.Id)
 		curAuthor, _ := articleServicer.GetAuthor(v.Id)
 		curBody, _ := articleServicer.GetArticleBody(v.Id)
 
-		if !dto.ArticleOtd(&rsparticles[i], &v, curAuthor, curBody, curCategory, curTags) {
+		if !dto.ArticleItemOtd(&rsparticles[i], &v, curAuthor, curBody, curTags) {
 			fmt.Printf("dto articles fail!\n")
 			resp.Fail(ctx, nil, "dto articles fail")
 			return
@@ -424,13 +423,8 @@ func GetArticles(ctx *gin.Context) {
 	// 构建分页结果
 	result := gin.H{
 		"articles": rsparticles,
-		"meta": gin.H{
-			"total":      total,
-			"page":       articleQuery.PageNumber,
-			"page_size":  articleQuery.PageSize,
-			"total_page": int(math.Ceil(float64(total) / float64(articleQuery.PageSize))),
-		},
 	}
+
 	resp.Success(ctx, result, "get articles success!")
 }
 
@@ -493,15 +487,15 @@ func GetSelectArticleView(ctx *gin.Context) {
 	// 获取 URL 参数中的文章 ID
 	articleIdStr := ctx.Param("id")
 	articleId, _ := strconv.Atoi(articleIdStr)
-	articleQuery := &ArticleQuery{}         // 定义ArticleVo结构体，根据需要修改字段和类型
-	err := ctx.ShouldBindJSON(articleQuery) // 将查询参数绑定到article结构体
-	if err != nil {
-		// 处理错误
-		resp.Fail(ctx, nil, err.Error())
-		return
-	}
+	// articleQuery := &ArticleQuery{}         // 定义ArticleVo结构体，根据需要修改字段和类型
+	// err := ctx.ShouldBindJSON(articleQuery) // 将查询参数绑定到article结构体
+	// if err != nil {
+	// 	// 处理错误
+	// 	resp.Fail(ctx, nil, err.Error())
+	// 	return
+	// }
 
-	articleServicer := NewArticleServicer(articleQuery)
+	articleServicer := NewArticleServicer(nil)
 	// 根据文章 ID 查询数据库获取文章详情
 	dbarticle, err := articleServicer.GetArticle(articleId)
 	if err != nil {
@@ -510,21 +504,22 @@ func GetSelectArticleView(ctx *gin.Context) {
 		return
 	}
 
-	rsparticle := &types.RspArticle{}
+	// TODO:
+	rsparticle := &types.RspArticleDetail{}
 
 	curCategory, _ := articleServicer.GetCategory(dbarticle.Id)
 	curTags, _ := articleServicer.GetTags(dbarticle.Id)
 	curAuthor, _ := articleServicer.GetAuthor(dbarticle.Id)
 	curBody, _ := articleServicer.GetArticleBody(dbarticle.Id)
 
-	if !dto.ArticleOtd(rsparticle, dbarticle, curAuthor, curBody, curCategory, curTags) {
+	if !dto.ArticleDetailOtd(rsparticle, dbarticle, curAuthor, curBody, curTags, *curCategory) {
 		fmt.Printf("dto articles fail!\n")
 		resp.Fail(ctx, nil, "dto articles fail")
 		return
 	}
 
 	// 返回文章详情
-	resp.Success(ctx, gin.H{"artcile": rsparticle}, "get article success!")
+	resp.Success(ctx, gin.H{"article": rsparticle}, "get articleDetail success!")
 }
 
 // 通过文章id获取文章分类
@@ -648,14 +643,13 @@ func GetArticleById(ctx *gin.Context) {
 		return
 	}
 
-	rsparticle := &types.RspArticle{}
+	rsparticle := &types.RspArticleItem{}
 
-	curCategory, _ := articleServicer.GetCategory(dbarticle.Id)
 	curTags, _ := articleServicer.GetTags(dbarticle.Id)
 	curAuthor, _ := articleServicer.GetAuthor(dbarticle.Id)
 	curBody, _ := articleServicer.GetArticleBody(dbarticle.Id)
 
-	if !dto.ArticleOtd(rsparticle, dbarticle, curAuthor, curBody, curCategory, curTags) {
+	if !dto.ArticleItemOtd(rsparticle, dbarticle, curAuthor, curBody, curTags) {
 		fmt.Printf("dto articles fail!\n")
 		resp.Fail(ctx, nil, "dto articles fail")
 		return

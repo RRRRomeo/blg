@@ -26,16 +26,20 @@ func ArticleDto(ar_db *model.Article, req *types.ReqArticle, authorId int64, cat
 }
 
 // 转换数据类型生成将要发给客户端的响应
-func ArticleOtd(rsp *types.RspArticle, dbo *model.Article, dbu *model.User, dbb *model.ArticleBody, category string, tags []string) bool {
+func ArticleItemOtd(rsp *types.RspArticleItem, dbo *model.Article, dbu *model.User, dbb *model.ArticleBody, tags []model.ArticleTag) bool {
 	rsp.Author = types.RspAuthor{Name: dbu.Account}
-	rsp.Body.Content = dbb.Content
-	rsp.Body.ContentHtml = dbb.ContentHtml
-	rsp.Category = category
 	rsp.CommentCounts = dbo.CommentCounts
-	rsp.CreateDate = dbo.CreateDate
+	rsp.CreateDate = dbo.CreateDate.String()
 	rsp.Id = dbo.Id
+	rsp.Weight = dbo.Weight
 	rsp.Summary = dbo.Summary
-	rsp.Tags = tags
+	ts := make([]types.RspTags, len(tags))
+	for i, v := range tags {
+		ts[i].Id = v.Id
+		ts[i].TagName = v.TagName
+	}
+
+	rsp.Tags = ts
 	rsp.Title = dbo.Title
 	rsp.ViewCount = dbo.ViewCounts
 	return true
@@ -45,5 +49,24 @@ func ArticleOtd(rsp *types.RspArticle, dbo *model.Article, dbu *model.User, dbb 
 func ArticleCardOtd(rsp *types.RspArticleCard, dbo *model.Article) bool {
 	rsp.Id = dbo.Id
 	rsp.Title = dbo.Title
+	return true
+}
+
+func ArticleDetailOtd(rsp *types.RspArticleDetail, dbo *model.Article, dbu *model.User, dbb *model.ArticleBody, tags []model.ArticleTag, category model.ArticleCategory) bool {
+	rsp.Id = dbo.Id
+	rsp.Title = dbo.Title
+	rsp.CommentCounts = dbo.CommentCounts
+	rsp.ViewCount = dbo.ViewCounts
+	rsp.Summary = dbo.Summary
+	rsp.Author = types.RspAuthor{Name: dbu.Account}
+	ts := make([]types.RspTags, len(tags))
+	for i, v := range tags {
+		ts[i].Id = v.Id
+		ts[i].TagName = v.TagName
+	}
+	rsp.Tags = ts
+	rsp.CreateDate = dbo.CreateDate.String()
+	rsp.Category = types.RspCategory{Id: category.Id, CategoryName: category.CategoryName}
+	rsp.Body = types.RspArticleBody{Content: dbb.Content, ContentHtml: dbb.ContentHtml}
 	return true
 }
